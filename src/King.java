@@ -1,6 +1,9 @@
 
 import java.util.Random;
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -9,6 +12,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -64,22 +68,32 @@ public class King extends BorderPane {
             }
         } while (!deck.isEmpty());
 
-        System.out.println("Cards distributed");
+        System.out.println("Cards distributed Wait the game is about to Start");
 //
-//            if (player1.remainCards() > player2.remainCards() && player1.remainCards() > player3.remainCards()) {
-//                startGame(player1, player2, player3);
-//            } else if (player2.remainCards() > player1.remainCards() && player2.remainCards() > player3.remainCards()) {
-//                startGame(player2, player3, player1);
-//            } else {
-//                startGame(player3, player1, player2);
-//            }
+//        Timeline timeline = new Timeline(new KeyFrame(
+//                Duration.seconds(5),
+//                e -> {
+
+        if (player1.remainCards() > player2.remainCards() && player1.remainCards() > player3.remainCards()) {
+            startGame(player1, player2, player3);
+        } else if (player2.remainCards() > player1.remainCards() && player2.remainCards() > player3.remainCards()) {
+            startGame(player2, player3, player1);
+        } else {
+            startGame(player3, player1, player2);
+        }
+//
+//                }));
+//        timeline.play();
     }
 
     public void startGame(Player p1, Player p2, Player p3) {
         System.out.println("Game Started");
-        do {
-            System.out.println(player1.remainCards() + " " + player2.remainCards() + " " + player3.remainCards());
 
+        System.out.println(player1.remainCards() + " " + player2.remainCards() + " " + player3.remainCards());
+
+        Timeline main = new Timeline();
+
+        KeyFrame p1Turn = new KeyFrame(Duration.seconds(2), e1 -> {
             if (!p1.isFinished()) {
                 if (!p2.isFinished()) {
                     playCard(p1, p2);
@@ -87,7 +101,10 @@ public class King extends BorderPane {
                     playCard(p1, p3);
                 }
             }
+        });
+        main.getKeyFrames().add(p1Turn);
 
+        KeyFrame p2Turn = new KeyFrame(Duration.seconds(4), e2 -> {
             if (!p2.isFinished()) {
                 if (!p3.isFinished()) {
                     playCard(p2, p3);
@@ -95,7 +112,10 @@ public class King extends BorderPane {
                     playCard(p2, p1);
                 }
             }
+        });
+        main.getKeyFrames().add(p2Turn);
 
+        KeyFrame p3Turn = new KeyFrame(Duration.seconds(6), e3 -> {
             if (!p3.isFinished()) {
                 if (!p1.isFinished()) {
                     playCard(p3, p1);
@@ -103,23 +123,21 @@ public class King extends BorderPane {
                     playCard(p3, p2);
                 }
             }
-        } while (!gameFinished());
+        });
+        main.getKeyFrames().add(p3Turn);
 
-        System.out.println(player1.remainCards() + " " + player2.remainCards() + " " + player3.remainCards() + " Game Finished");
+        main.setCycleCount(Animation.INDEFINITE);
+        main.playFromStart();
+
+        //if(gameFinished())
+        //  main.pause();
+        // System.out.println(player1.remainCards() + " " + player2.remainCards() + " " + player3.remainCards() + " Game Finished");
     }
 
     public void playCard(Player p1, Player p2) {
 
-        p2.cardsShuffle();
-        
-        if (p1 instanceof MainPlayer) {
-            p2.setOnMouseClicked(e->{
-                p1.takeCard(p2.giveClickedCard());
-            });
-            
-        } else {
-            p1.takeCard(p2.giveCard(random.nextInt(p2.remainCards()) + 1));
-        }
+        p1.takeCard(p2.giveCard(random.nextInt(p2.remainCards()) + 1));
+
     }
 
     public boolean gameFinished() {

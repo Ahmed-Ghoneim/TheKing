@@ -55,7 +55,7 @@ class Deck {
         ObservableList list = flowPane.getChildren();
         for (Card c : cards) {
 
-            list.add(c.showFront());
+            list.add(c.FRONT_VIEW);
         }
         flowPane.setMaxSize(700, 700);
         return flowPane;

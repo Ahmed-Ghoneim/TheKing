@@ -1,10 +1,14 @@
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -13,6 +17,7 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import jdk.nashorn.internal.ir.BreakNode;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -25,11 +30,15 @@ import javafx.util.Duration;
  */
 public class King extends BorderPane {
 
+    ArrayList<MouseEvent> m = new ArrayList();
+
     Deck deck = new Deck();
     MainPlayer player1 = new MainPlayer();
-    Player player2 = new Player("Player 2 Name here");
-    Player player3 = new Player("Player 3 Name here");
+    Player player2 = new Player("Fa5ry");
+    Player player3 = new Player("Bayomy");
     Random random = new Random();
+    Text round = new Text("Game Started");
+    Timeline main;
 
     King() {
         setStyle("-fx-background-image: url('png/g.png'); "
@@ -40,21 +49,46 @@ public class King extends BorderPane {
         deck.deckShuffle();
         deck.getKingReady();
         deck.deckShuffle();
-
+        round.setFont(Font.font("Arial", 72));
         distribution();
-        new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                getChildren().clear();
-                setBottom(player1.displayCardsV());
-                setRight(player2.displayCardsV());
-                setLeft(player3.displayCardsV());
-            }
-
-        }.start();
-
+        setAlignment(round, Pos.CENTER);
+        round.setFill(Color.RED);
+        render();
+        setProperty();
+        
+//        new AnimationTimer() {
+//            @Override
+//            public void handle(long now) {
+//                 getChildren().clear();
+//        setTop(round);
+//        setBottom(player1);
+//        setRight(player2);
+//        setLeft(player3);
+//            }
+//
+//}.start();
     }
 
+    public void render() {
+        getChildren().clear();
+        setTop(round);
+        setBottom(player1);
+        setRight(player2);
+        setLeft(player3);
+    }
+    
+    public void setProperty(){
+//        player1.layoutYProperty().bind(this.layoutYProperty());
+//        player2.layoutXProperty().bind(this.layoutXProperty());
+//        player2.layoutYProperty().bind(this.layoutYProperty());
+//        player3.layoutXProperty().bind(this.layoutXProperty());
+//        player3.layoutYProperty().bind(this.layoutYProperty());
+    }
+
+    /**
+     * This method is used to distribute the Deck cards and auto invoke
+     * startGame method after finishing card distribution.
+     */
     public void distribution() {
         deck.deckShuffle();
 
@@ -69,10 +103,6 @@ public class King extends BorderPane {
         } while (!deck.isEmpty());
 
         System.out.println("Cards distributed Wait the game is about to Start");
-//
-//        Timeline timeline = new Timeline(new KeyFrame(
-//                Duration.seconds(5),
-//                e -> {
 
         if (player1.remainCards() > player2.remainCards() && player1.remainCards() > player3.remainCards()) {
             startGame(player1, player2, player3);
@@ -81,17 +111,19 @@ public class King extends BorderPane {
         } else {
             startGame(player3, player1, player2);
         }
-//
-//                }));
-//        timeline.play();
+
     }
 
+    /**
+     *
+     * @param p1
+     * @param p2
+     * @param p3
+     */
     public void startGame(Player p1, Player p2, Player p3) {
-        System.out.println("Game Started");
-
         System.out.println(player1.remainCards() + " " + player2.remainCards() + " " + player3.remainCards());
 
-        Timeline main = new Timeline();
+        main = new Timeline();
 
         KeyFrame p1Turn = new KeyFrame(Duration.seconds(2), e1 -> {
             if (!p1.isFinished()) {
@@ -129,26 +161,55 @@ public class King extends BorderPane {
         main.setCycleCount(Animation.INDEFINITE);
         main.playFromStart();
 
-        //if(gameFinished())
-        //  main.pause();
-        // System.out.println(player1.remainCards() + " " + player2.remainCards() + " " + player3.remainCards() + " Game Finished");
     }
 
     public void playCard(Player p1, Player p2) {
 
-        p1.takeCard(p2.giveCard(random.nextInt(p2.remainCards()) + 1));
+        p2.cardsShuffle();
+        int x = random.nextInt(p2.remainCards());
+        if (x != 0) {
+            x--;
+        }
+
+        if (p1.equals(player1)) {
+            main.pause();
+
+            p2.setOnMousePressed(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent e) {
+                    System.out.print("Clicked\n");
+                    if (p2.cardClicked(e)) {
+                        p1.takeCard(p2.giveClickedCard());
+                        p2.setOnMousePressed(null);
+                        main.play();
+                    } else {
+                        playCard(p1, p2);
+                    }
+
+                }
+
+            });
+
+        } else {
+            
+            p1.takeCard(p2.giveCard(x));
+
+        }
 
     }
 
     public boolean gameFinished() {
 
         if (player1.isFinished() && player2.isFinished()) {
+            round.setText("Game Finished, " + player3.getName() + " is the looooser!!");
             System.out.println("player 3");
             return true;
         } else if (player2.isFinished() && player3.isFinished()) {
+            round.setText("Game Finished, " + player1.getName() + " is the looooser!!");
             System.out.println("player 1");
             return true;
         } else if (player1.isFinished() && player3.isFinished()) {
+            round.setText("Game Finished, " + player2.getName() + " is he looooser!!");
             System.out.println("player 2");
             return true;
         } else {

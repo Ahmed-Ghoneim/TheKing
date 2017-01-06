@@ -54,33 +54,6 @@ class Card {
         imageView.setCache(true);
         return imageView;
     }
-//
-//    public ImageView showFront() {
-//        ImageView imageView = new ImageView(FRONT);
-//        DropShadow ds = new DropShadow(20, Color.BLACK);
-//        imageView.setEffect(ds);
-//        imageView.setFitHeight(120);
-//        imageView.setPreserveRatio(true);
-//        imageView.setSmooth(true);
-//        imageView.setCache(true);
-//        //imageView.setOnMouseClicked(value);
-//        return imageView;
-//    }
-//
-//    public ImageView showBack() {
-//        ImageView imageView = new ImageView(BACK);
-//        DropShadow ds = new DropShadow(20, Color.BLACK);
-//        imageView.setEffect(ds);
-//        imageView.setFitHeight(120);
-//        imageView.setPreserveRatio(true);
-//        imageView.setSmooth(true);
-//        imageView.setCache(true);
-//        return imageView;
-//    }
-//
-//    public boolean isClicked() {
-//        return clicked;
-//    }
 
     @Override
     public boolean equals(Object obj) {
